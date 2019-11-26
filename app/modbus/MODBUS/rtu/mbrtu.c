@@ -185,7 +185,7 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
     eMBErrorCode    eStatus = MB_ENOERR;
     USHORT          usCRC16;
 
-    ENTER_CRITICAL_SECTION(  );
+    // ENTER_CRITICAL_SECTION(  );
 
     /* Check if the receiver is still in idle state. If not we where to
      * slow with processing the received frame and the master sent another
@@ -211,12 +211,13 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
         eSndState = STATE_TX_XMIT;
         vMBPortSerialEnable( FALSE, TRUE );
         pxMBFrameCBTransmitterEmpty();
+        // xMBPortSerialPutByte( ( CHAR )0);
     }
     else
     {
         eStatus = MB_EIO;
     }
-    EXIT_CRITICAL_SECTION(  );
+    // EXIT_CRITICAL_SECTION(  );
     return eStatus;
 }
 

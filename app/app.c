@@ -75,7 +75,7 @@ void app() {
     while(1) {
         modbus_poll();
         HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
-        HAL_Delay(50);
+        HAL_Delay(1);
     }
 }
 

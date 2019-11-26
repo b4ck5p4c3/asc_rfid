@@ -4,13 +4,13 @@ import time
 import random
 
 RETRIES = 7
-RETRY_TIMEOUT = 0.5
-SAFE_TIMEOUT = 0.5
+RETRY_TIMEOUT = 0.1
+SAFE_TIMEOUT = 0.0
 
 def safe_reads(mb, address, size):
   for i in xrange(RETRIES):
     try:
-      if i > 1:
+      if i > 0:
         print "retry read", i
       return mb.read_bits(address, size)
       time.sleep(SAFE_TIMEOUT)
@@ -20,9 +20,23 @@ def safe_reads(mb, address, size):
 
   print "modbus TIMEOUT"
 
+def safe_write(mb, address, data):
+  for i in xrange(RETRIES):
+    try:
+      if i > 0:
+        print "retry write", i
+      mb.write_bit(address, data, functioncode=0x05)
+      time.sleep(SAFE_TIMEOUT)
+      return
+    except Exception:
+      # print "except"
+      time.sleep(RETRY_TIMEOUT)
+
+  print "modbus TIMEOUT"
+
 minimalmodbus.TIMEOUT = 5
 minimalmodbus.PARITY = 'N'
-slave_address = 12
+slave_address = 2
 
 MODBUS_READ_INPUT = 0x4
 
@@ -38,17 +52,19 @@ REG_INPUT_GAS_H   = 7
 REG_INPUT_SIZE = 8
 
 READ_EN_BASE = 0x100
+MODE_BASE = 0
 
-mb = minimalmodbus.Instrument('/dev/ttyUSB0', slave_address, mode='rtu', debug=True)
+
+mb = minimalmodbus.Instrument('/dev/ttyUSB0', slave_address, mode='rtu', debug=False)
 if not mb.serial.is_open:
   mb.serial.open()
 
 mb.serial.baudrate = 115200
-mb.handle_local_echo = True
+# mb.handle_local_echo = True
 
 while(1):
   safe_reads(mb, READ_EN_BASE, 1)
-
-  time.sleep(1)
+  safe_write(mb, 0, 1)
+  time.sleep(0.01)
 
 

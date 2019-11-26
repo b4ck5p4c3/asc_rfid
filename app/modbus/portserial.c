@@ -25,6 +25,7 @@ vMBPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable) {
 
     if (xTxEnable && !xRxEnable) {
         HAL_GPIO_WritePin(MODBUS_DE_PORT, MODBUS_DE_PIN, GPIO_PIN_SET);
+        // HAL_Delay(1);
     }
 }
 
