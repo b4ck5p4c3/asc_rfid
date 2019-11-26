@@ -9,6 +9,8 @@
 #include "modbus.h"
 #include "registers.h"
 
+#include "pn532_stm32f1.h"
+
 // pin init helper
 typedef enum {
     GpioModeInput,
@@ -68,13 +70,41 @@ uint8_t get_discrete(uint8_t index) {
 }
 
 void app() {
+    uint8_t buff[255];
+    uint8_t uid[MIFARE_UID_MAX_LENGTH];
+
+    PN532 pn532;
+    PN532_I2C_Init(&pn532);
+
     printf("=== RFID ASC B4CKSP4CE ===\n");
+
+    HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, GPIO_PIN_SET);
+
+    bool nfc_ready = false;
+
+    if (PN532_GetFirmwareVersion(&pn532, buff) == PN532_STATUS_OK) {
+        nfc_ready = true;
+        HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, GPIO_PIN_RESET);
+    } else {
+        HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, GPIO_PIN_SET);
+    }
+
+    if(nfc_ready) {
+        PN532_SamConfiguration(&pn532);
+    }
 
     modbus_init();
 
     while(1) {
+        if(nfc_ready) {
+            int32_t uid_len = PN532_ReadPassiveTarget(&pn532, uid, PN532_MIFARE_ISO14443A, 100);
+            if (uid_len == PN532_STATUS_ERROR) {
+            } else {
+                HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
+            }
+        }
+
         modbus_poll();
-        HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
         HAL_Delay(1);
     }
 }
