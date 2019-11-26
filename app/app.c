@@ -69,6 +69,8 @@ uint8_t get_discrete(uint8_t index) {
     return res;
 }
 
+void modbus_poll_enable();
+
 void app() {
     uint8_t buff[255];
     uint8_t uid[MIFARE_UID_MAX_LENGTH];
@@ -94,17 +96,17 @@ void app() {
     }
 
     modbus_init();
+    modbus_poll_enable();
 
     while(1) {
         if(nfc_ready) {
-            int32_t uid_len = PN532_ReadPassiveTarget(&pn532, uid, PN532_MIFARE_ISO14443A, 100);
+            int32_t uid_len = PN532_ReadPassiveTarget(&pn532, uid, PN532_MIFARE_ISO14443A, 1000);
             if (uid_len == PN532_STATUS_ERROR) {
             } else {
                 HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
             }
         }
-
-        modbus_poll();
+        
         HAL_Delay(1);
     }
 }

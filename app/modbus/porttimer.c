@@ -2,9 +2,12 @@
 #include <mbport.h>
 #include <periph.h>
 
+#include "modbus.h"
+
 extern TIM_HandleTypeDef htim14;
 static uint16_t timeout     = 0;
 static uint16_t downcounter = 0;
+static uint16_t poll_counter = 0;
 
 BOOL xMBPortTimersInit(USHORT usTimerout50us) {
 	htim14.Instance               = TIM14;
@@ -25,6 +28,10 @@ BOOL xMBPortTimersInit(USHORT usTimerout50us) {
 	return TRUE;
 }
 
+void modbus_poll_enable() {
+	poll_counter = 1000 / 50;
+}
+
 void vMBPortTimersEnable()
 {
 	downcounter = timeout;
@@ -32,7 +39,7 @@ void vMBPortTimersEnable()
 }
 
 void vMBPortTimersDisable() {
-	HAL_TIM_Base_Stop_IT(&htim14);
+	// HAL_TIM_Base_Stop_IT(&htim14);
 }
 
 extern uint32_t test_var;
@@ -42,10 +49,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		return;
 	}
 
-	if (!--downcounter) {
+	if (downcounter == 0) {
 		test_var++;
 		pxMBPortCBTimerExpired();
+	} else {
+		downcounter--;
 	}
+
+	if (!--poll_counter) {
+		modbus_poll();
+		modbus_poll_enable();
+	}
+
 }
 
 void TIM14_IRQHandler(void) {
