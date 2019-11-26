@@ -30,6 +30,10 @@ void registers_set_gas(uint32_t gas) {
 	memcpy(&usRegInputBuf[REF_INPUT_GAS], &gas, 4);
 }
 
+void registers_set(size_t offset, uint32_t value) {
+    usRegInputBuf[REG_INPUT_TEMP + offset] = value;
+}
+
 void set_coil(uint8_t index, uint8_t state);
 uint8_t get_discrete(uint8_t index);
 
@@ -142,6 +146,9 @@ eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNReg
         {
             *pucRegBuffer++ = (unsigned char)(usRegInputBuf[iRegIndex] >> 8);
             *pucRegBuffer++ = (unsigned char)(usRegInputBuf[iRegIndex] & 0xFF);
+
+            usRegInputBuf[iRegIndex] = 0;
+
             iRegIndex++;
             usNRegs--;
         }

@@ -103,10 +103,13 @@ void app() {
             int32_t uid_len = PN532_ReadPassiveTarget(&pn532, uid, PN532_MIFARE_ISO14443A, 1000);
             if (uid_len == PN532_STATUS_ERROR) {
             } else {
+                for(size_t i = 0; i < uid_len; i++) {
+                    registers_set(i, uid[i]);
+                }
                 HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
             }
         }
-        
+
         HAL_Delay(1);
     }
 }

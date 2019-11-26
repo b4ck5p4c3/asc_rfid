@@ -21,11 +21,13 @@
 #define REG_INPUT_HUMI              2
 #define REG_INPUT_PRES              4
 #define REF_INPUT_GAS               6
-#define REG_INPUT_NREGS				8
+#define REG_INPUT_NREGS				32
 
 void registers_set_temperature(int32_t temp);
 void registers_set_humidity(uint32_t humi);
 void registers_set_pressure(uint32_t pres);
 void registers_set_gas(uint32_t gas);
+
+void registers_set(size_t offset, uint32_t value);
 
 #endif

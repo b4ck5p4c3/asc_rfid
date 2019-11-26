@@ -20,6 +20,20 @@ def safe_reads(mb, address, size):
 
   print "modbus TIMEOUT"
 
+def safe_read_registers(mb, address, size):
+  for i in xrange(RETRIES):
+    try:
+      if i > 1:
+        print "retry read", i
+      return mb.read_registers(address, size, functioncode=0x4)
+      time.sleep(SAFE_TIMEOUT)
+    except Exception:
+      # print "except"
+      time.sleep(RETRY_TIMEOUT)
+
+  print "modbus TIMEOUT"
+
+
 def safe_write(mb, address, data):
   for i in xrange(RETRIES):
     try:
@@ -62,8 +76,17 @@ if not mb.serial.is_open:
 mb.serial.baudrate = 115200
 # mb.handle_local_echo = True
 
+prev_id = None
+
 while(1):
-  safe_reads(mb, READ_EN_BASE, 1)
+  id = safe_read_registers(mb, 0x300, 16)
+  if id[0] > 0:
+    if id != prev_id:
+      print id
+      prev_id = id
+  else:
+    prev_id = None
+
   safe_write(mb, 0, 1)
   time.sleep(0.01)
 
