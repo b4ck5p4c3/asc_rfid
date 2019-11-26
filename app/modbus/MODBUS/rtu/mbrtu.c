@@ -185,14 +185,13 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
     eMBErrorCode    eStatus = MB_ENOERR;
     USHORT          usCRC16;
 
-    // ENTER_CRITICAL_SECTION(  );
+    ENTER_CRITICAL_SECTION(  );
 
     /* Check if the receiver is still in idle state. If not we where to
      * slow with processing the received frame and the master sent another
      * frame on the network. We have to abort sending the frame.
      */
-    if( eRcvState == STATE_RX_IDLE )
-    {
+    if( eRcvState == STATE_RX_IDLE ) {
 
         /* First byte before the Modbus-PDU is the slave address. */
         pucSndBufferCur = ( UCHAR * ) pucFrame - 1;
@@ -210,14 +209,14 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
         /* Activate the transmitter. */
         eSndState = STATE_TX_XMIT;
         vMBPortSerialEnable( FALSE, TRUE );
+        EXIT_CRITICAL_SECTION(  );
         pxMBFrameCBTransmitterEmpty();
-        // xMBPortSerialPutByte( ( CHAR )0);
+        return eStatus;
+    } else {
+        EXIT_CRITICAL_SECTION(  );
+        return MB_EIO;
     }
-    else
-    {
-        eStatus = MB_EIO;
-    }
-    // EXIT_CRITICAL_SECTION(  );
+
     return eStatus;
 }
 
