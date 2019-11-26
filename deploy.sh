@@ -1,0 +1,1 @@
+st-flash write build/RS2ALL.bin 0x08000000
