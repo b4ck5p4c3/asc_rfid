@@ -88,6 +88,10 @@ void app() {
         nfc_ready = true;
         HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, GPIO_PIN_RESET);
     } else {
+        for(size_t i = 0; i < 10; i++) {
+            HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
+            HAL_Delay(50);
+        }
         HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, GPIO_PIN_SET);
     }
 
